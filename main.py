@@ -1,7 +1,6 @@
 
 import os
 import requests
-import sys
 
 API = "https://api.github.com"
 TOKEN = os.environ["GH_TOKEN"]
@@ -37,28 +36,8 @@ def get_users(endpoint):
     return users
 
 
-def follow(username):
-    response = requests.put(
-        f"{API}/user/following/{username}",
-        headers=headers,
-        timeout=30
-    )
-    response.raise_for_status()
-    print(f"FOLLOWED: {username}")
-
-
-def unfollow(username):
-    response = requests.delete(
-        f"{API}/user/following/{username}",
-        headers=headers,
-        timeout=30
-    )
-    response.raise_for_status()
-    print(f"UNFOLLOWED: {username}")
-
-
 def main():
-    print("GitHub Mutual Follow Sync Started")
+    print("GitHub Mutual Follow Bot - DRY RUN")
 
     followers = get_users("/user/followers")
     following = get_users("/user/following")
@@ -66,23 +45,20 @@ def main():
     to_follow = followers - following
     to_unfollow = following - followers
 
-    print("Followers:", len(followers))
-    print("Following:", len(following))
-    print("New mutual follows:", len(to_follow))
-    print("Non-mutual follows:", len(to_unfollow))
+    print("\n========== REPORT ==========")
+    print("Total followers:", len(followers))
+    print("Total following:", len(following))
 
+    print("\nPeople to follow:")
     for user in sorted(to_follow):
-        follow(user)
+        print("+", user)
 
+    print("\nNon-mutual follows to review:")
     for user in sorted(to_unfollow):
-        unfollow(user)
+        print("-", user)
 
-    print("Synchronization completed!")
+    print("\nNo accounts were changed.")
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as error:
-        print("ERROR:", error)
-        sys.exit(1)
+    main()
